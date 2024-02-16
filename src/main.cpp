@@ -69,9 +69,15 @@ int loadFile(MeshEdit* collada_viewer, const char* path) {
 
 int main( int argc, char** argv ) {
 
+  // sanity check for argument passing
+  if (argc != 2) {
+    msg("Please make sure to launch the executable with a path to the scene file as an argument! \n Example: ./meshedit ../../curve1.bzc"); 
+    exit(0);
+  }
+
   const char* path = argv[1];
   std::string path_str = path;
-
+ 
   //////////////////////////////
   // Bezier curve viewer code //
   //////////////////////////////
@@ -112,10 +118,10 @@ int main( int argc, char** argv ) {
   viewer.init();
 
   // load tests
-  if( argc == 2 ) {
-    if (loadFile(collada_viewer, argv[1]) < 0) exit(0);
-  } else {
-    msg("Usage: ./meshedit <path to scene file>"); exit(0);
+  if (loadFile(collada_viewer, argv[1]) < 0) 
+  {
+    msg("Failed loading the scene file. Make sure the file pathing is correct!");
+    exit(0);
   }
 
   // start viewer
