@@ -67,6 +67,13 @@ int loadFile(MeshEdit* collada_viewer, const char* path) {
   return 0;
 }
 
+// automatically close FD when unwinding stackframe during exception/termination
+struct FILE_RAII
+{
+  FILE* file;
+  ~FILE_RAII() { if (file) fclose(file); }
+};
+
 int main( int argc, char** argv ) {
 
   // sanity check for argument passing
@@ -85,14 +92,14 @@ int main( int argc, char** argv ) {
   if (path_str.substr(path_str.length()-4, 4) == ".bzc")
   {
     // Each file contains a single Bezier curve's control points
-    FILE* file = fopen(path, "r");
+    FILE_RAII file_raii;
+    file_raii.file = fopen(path, "r");
 
     int numControlPoints;
-    fscanf(file, "%d", &numControlPoints);
+    fscanf(file_raii.file, "%d", &numControlPoints);
 
     BezierCurve curve(numControlPoints);
-    curve.loadControlPoints(file);
-    fclose(file);
+    curve.loadControlPoints(file_raii.file);
 
     // Create viewer
     Viewer viewer = Viewer();
