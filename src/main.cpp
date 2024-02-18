@@ -17,7 +17,7 @@ using namespace CGL;
 // automatically close FD when unwinding stackframe during exception/termination
 struct FileHandle
 {
-  FILE* file;
+  FILE* file = NULL;
   ~FileHandle() { if (file) fclose(file); }
 };
 
