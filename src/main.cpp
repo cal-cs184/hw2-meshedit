@@ -14,6 +14,13 @@ using namespace CGL;
 
 #define msg(s) cerr << "[Collada Viewer] " << s << endl;
 
+// automatically close FD when unwinding stackframe during exception/termination
+struct FileHandle
+{
+  FILE* file;
+  ~FileHandle() { if (file) fclose(file); }
+};
+
 int loadFile(MeshEdit* collada_viewer, const char* path) {
 
   Scene* scene = new Scene();
@@ -34,18 +41,17 @@ int loadFile(MeshEdit* collada_viewer, const char* path) {
     node.instance = cam;
     scene->nodes.push_back(node);
     Polymesh* mesh = new Polymesh();
-
-    FILE* file = fopen(path, "r");
+    FileHandle file_handle;
+    file_handle.file = fopen(path, "r");
     int n = 0;
-    fscanf(file, "%d", &n);
+    fscanf(file_handle.file, "%d", &n);
     for (int i = 0; i < n; i++)
     {
       BezierPatch patch;
-      patch.loadControlPoints(file);
+      patch.loadControlPoints(file_handle.file);
       patch.add2mesh(mesh);
       mergeVertices(mesh);
     }
-    fclose(file);
 
     mesh->type = POLYMESH;
     node.instance = mesh;
@@ -67,12 +73,6 @@ int loadFile(MeshEdit* collada_viewer, const char* path) {
   return 0;
 }
 
-// automatically close FD when unwinding stackframe during exception/termination
-struct FILE_RAII
-{
-  FILE* file;
-  ~FILE_RAII() { if (file) fclose(file); }
-};
 
 int main( int argc, char** argv ) {
 
@@ -92,14 +92,14 @@ int main( int argc, char** argv ) {
   if (path_str.substr(path_str.length()-4, 4) == ".bzc")
   {
     // Each file contains a single Bezier curve's control points
-    FILE_RAII file_raii;
-    file_raii.file = fopen(path, "r");
+    FileHandle file_handle;
+    file_handle.file = fopen(path, "r");
 
     int numControlPoints;
-    fscanf(file_raii.file, "%d", &numControlPoints);
+    fscanf(file_handle.file, "%d", &numControlPoints);
 
     BezierCurve curve(numControlPoints);
-    curve.loadControlPoints(file_raii.file);
+    curve.loadControlPoints(file_handle.file);
 
     // Create viewer
     Viewer viewer = Viewer();
