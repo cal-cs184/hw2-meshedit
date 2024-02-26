@@ -17,7 +17,15 @@ namespace CGL
   { 
     // TODO Part 1.
     
-    return std::vector<Vector2D>();
+      std::vector<Vector2D> result;
+
+      for (int i = 0; i < points.size() - 1; i++) {
+          Vector2D temp = (1 - t) * points[i] + t * points[i + 1];
+          result.push_back(temp);
+      }
+
+
+      return result;
   }
 
   /**
