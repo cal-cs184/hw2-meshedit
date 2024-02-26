@@ -31,7 +31,24 @@ namespace CGL
   std::vector<Vector3D> BezierPatch::evaluateStep(std::vector<Vector3D> const &points, double t) const
   {
     // TODO Part 2.
-    return std::vector<Vector3D>();
+
+      std::vector<Vector3D> result;
+
+
+      //if (points.size() == 1) {
+      //    result.push_back(points[0]);
+      //    return result;
+      //}
+
+      for (int i = 0; i < points.size() - 1; i++) {
+          Vector3D temp = (1 - t) * points[i] + t * points[i + 1];
+          result.push_back(temp);
+      }
+
+
+      return result;
+
+    //return std::vector<Vector3D>();
   }
 
   /**
@@ -44,7 +61,19 @@ namespace CGL
   Vector3D BezierPatch::evaluate1D(std::vector<Vector3D> const &points, double t) const
   {
     // TODO Part 2.
-    return Vector3D();
+
+      Vector3D result;
+      
+      if (points.size() == 1) {
+          result = points[0];
+          return result;
+      }
+      
+      std::vector<Vector3D> e = evaluateStep(points, t);
+      
+      return evaluate1D(e, t);
+    // evaluateStep
+    //return Vector3D();
   }
 
   /**
@@ -57,7 +86,16 @@ namespace CGL
   Vector3D BezierPatch::evaluate(double u, double v) const 
   {  
     // TODO Part 2.
-    return Vector3D();
+      std::vector<Vector3D> on_u;
+      for (int i = 0; i < controlPoints.size(); i++) {
+          on_u.push_back(evaluate1D(controlPoints[i], u));
+      }
+
+      Vector3D on_v;
+      on_v = evaluate1D(on_u, v);
+
+      
+    return on_v;
   }
 
   Vector3D Vertex::normal( void ) const
@@ -318,10 +356,27 @@ namespace CGL
     // This routine should increase the number of triangles in the mesh using Loop subdivision.
     // One possible solution is to break up the method as listed below.
 
-    // 1. Compute new positions for all the vertices in the input mesh, using the Loop subdivision rule,
-    // and store them in Vertex::newPosition. At this point, we also want to mark each vertex as being
-    // a vertex of the original mesh.
+      // 1. Compute new positions for all the vertices in the input mesh, using the Loop subdivision rule,
+      // and store them in Vertex::newPosition. At this point, we also want to mark each vertex as being
+      // a vertex of the original mesh.
+
+      //mesh.verticesBegin();
+      /*for (int i = 0; i < verticies; i++) {
+      *     vertice_a = 
+          * vertice_b = 
+          * vertice_c = 
+          * vertice_d = 
+            vertice_new_position = ((3 / 8) * (A + B)) + ((1 / 8) * (C + D))
+        }*/
     
+      //new_vertex upgrade 3 / 8 * (A + B) + 1 / 8 * (C + D)
+       /*for (int i = 0; i < edges; i++) {
+      *    edge.split()
+      * 
+        }*/
+      
+      //old_vertex upgrade (1 - n * u) * original_position + u * original_neighbor_position_sum
+
     // 2. Compute the updated vertex positions associated with edges, and store it in Edge::newPosition.
     
     // 3. Split every edge in the mesh, in any order. For future reference, we're also going to store some
