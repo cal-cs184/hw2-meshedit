@@ -211,14 +211,17 @@ namespace CGL
 
   }
 
-  VertexIter HalfedgeMesh::splitEdge( EdgeIter e0 )
+  VertexIter HalfedgeMesh::splitEdge( EdgeIter e0)
   {
     // TODO Part 5.
     // This method should split the given edge and return an iterator to the newly inserted vertex.
     // The halfedge of this vertex should point along the edge that was split, rather than the new edges.
     
     // Our notes on new picture after splitting can be seen on https://lzztypora.oss-cn-beijing.aliyuncs.com/202402251921116.png.
+    
+    if (e0->isBoundary()) { return e0->halfedge()->vertex(); }
     // Step1: Draw every elements just like before
+
     HalfedgeIter h0 = e0->halfedge();
     HalfedgeIter h1 = h0->next();
     HalfedgeIter h2 = h1->next();
