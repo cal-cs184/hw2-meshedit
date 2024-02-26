@@ -34,12 +34,6 @@ namespace CGL
 
       std::vector<Vector3D> result;
 
-
-      //if (points.size() == 1) {
-      //    result.push_back(points[0]);
-      //    return result;
-      //}
-
       for (int i = 0; i < points.size() - 1; i++) {
           Vector3D temp = (1 - t) * points[i] + t * points[i + 1];
           result.push_back(temp);
@@ -72,8 +66,6 @@ namespace CGL
       std::vector<Vector3D> e = evaluateStep(points, t);
       
       return evaluate1D(e, t);
-    // evaluateStep
-    //return Vector3D();
   }
 
   /**
