@@ -1294,7 +1294,7 @@ namespace CGL {
       do
       {
         if(smoothShading)
-          normal = h->vertex()->normal();
+          normal = h->vertex()->normal(); //There
         glNormal3dv( &normal.x );
         // Draw this vertex.
         Vector3D position = h->vertex()->position;
@@ -1536,7 +1536,7 @@ namespace CGL {
     }
 
     if( e == NULL ) { cerr << "Must select an edge." << endl; return; }
-    selectedFeature.node->mesh.flipEdge( e->halfedge()->edge() );
+    selectedFeature.node->mesh.flipEdge( e->halfedge()->edge() ); // There
 
     // Since the mesh may have changed, the selected and
     // hovered features may no longer point to valid elements.

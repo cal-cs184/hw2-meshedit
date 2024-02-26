@@ -16,6 +16,7 @@ namespace CGL
   std::vector<Vector2D> BezierCurve::evaluateStep(std::vector<Vector2D> const &points)
   { 
     // TODO Part 1.
+    
     return std::vector<Vector2D>();
   }
 
@@ -65,14 +66,148 @@ namespace CGL
     // Returns an approximate unit normal at this vertex, computed by
     // taking the area-weighted average of the normals of neighboring
     // triangles, then normalizing.
-    return Vector3D();
+    // cout << "Where you are";
+
+    Vector3D normal(0, 0, 0);
+
+    HalfedgeCIter h_origin = halfedge(); //用上一层级
+    VertexCIter v_origin = h_origin->vertex();
+
+    // Use class Edge
+    do {
+        // Calculate the two other points in the same triangle
+        VertexCIter v1 = h_origin->twin()->vertex(); 
+        VertexCIter v2 = h_origin->twin()->next()->twin()->vertex(); 
+        Vector3D linetwin = v1->position - v_origin->position;
+        Vector3D linenext = v2->position - v_origin->position;
+        Vector3D normal_eachface = cross(-linetwin, linenext); //Notice the direction of normal
+        
+        float area = 0.5 * normal_eachface.norm();
+        normal += area * normal_eachface;
+
+        h_origin = h_origin->twin()->next();   
+
+    } while (h_origin != v_origin->halfedge());          
+    //cout << normal / normal.norm()<<endl;
+    
+    return normal/normal.norm()+1e-10;
+    
   }
 
   EdgeIter HalfedgeMesh::flipEdge( EdgeIter e0 )
   {
     // TODO Part 4.
     // This method should flip the given edge and return an iterator to the flipped edge.
-    return EdgeIter();
+    // Refer from the class materials:http://15462.courses.cs.cmu.edu/fall2015content/misc/HalfedgeEdgeOpImplementationGuide.pdf
+    
+    if (e0->isBoundary()) { return e0; }
+
+    // Step1: Draw every elements
+    HalfedgeIter h0 = e0->halfedge();
+    HalfedgeIter h1 = h0->next();
+    HalfedgeIter h2 = h1->next();
+    HalfedgeIter h3 = h0->twin();
+    HalfedgeIter h4 = h3->next();
+    HalfedgeIter h5 = h4->next();
+    HalfedgeIter h6 = h1->twin();
+    HalfedgeIter h7 = h2->twin();
+    HalfedgeIter h8 = h4->twin();
+    HalfedgeIter h9 = h5->twin();
+
+    VertexIter v0 = h0->vertex();
+    VertexIter v1 = h3->vertex();
+    VertexIter v2 = h6->vertex();
+    VertexIter v3 = h8->vertex();
+
+    // EdgeIter e0 = h0->edge();
+    EdgeIter e1 = h1->edge();
+    EdgeIter e2 = h2->edge();
+    EdgeIter e3 = h4->edge();
+    EdgeIter e4 = h5->edge();
+
+    FaceIter f0 = h0->face();
+    FaceIter f1 = h3->face();
+
+    //Step2: Reassign elements
+    h0->next() = h1;
+    h0->twin() = h3;
+    h0->vertex() = v3;
+    h0->edge() = e0;
+    h0->face() = f0; //All faces are not changed
+    // A debug there is that we should use EdgeIter other EdgeCIter
+    
+    h1->next() = h2;
+    h1->twin() = h7;
+    h1->vertex() = v2;
+    h1->edge() = e2;
+    h1->face() = f0;
+
+    h2->next() = h0;
+    h2->twin() = h8;
+    h2->vertex() = v0;
+    h2->edge() = e3;
+    h2->face() = f0;
+
+    h3->next() = h4;
+    h3->twin() = h0;
+    h3->vertex() = v2;
+    h3->edge() = e0;
+    h3->face() = f1;
+
+    h4->next() = h5;
+    h4->twin() = h9;
+    h4->vertex() = v3;
+    h4->edge() = e4;
+    h4->face() = f1;
+
+    h5->next() = h3;
+    h5->twin() = h6;
+    h5->vertex() = v1;
+    h5->edge() = e1;
+    h5->face() = f1;
+
+    h6->next() = h6->next(); // Stays the same, but set it anyway
+    h6->twin() = h5;
+    h6->vertex() = v2;
+    h6->edge() = e1;
+    h6->face() = h6->face(); // Stays the same, but set it anyway
+
+    h7->next() = h7->next(); // Stays the same, but set it anyway
+    h7->twin() = h1;
+    h7->vertex() = v0;
+    h7->edge() = e2; 
+    h7->face() = h7->face(); // Stays the same, but set it anyway
+
+    h8->next() = h8->next(); // Stays the same, but set it anyway
+    h8->twin() = h2;
+    h8->vertex() = v3;
+    h8->edge() = e3; 
+    h8->face() = h8->face(); // Stays the same, but set it anyway
+
+    h9->next() = h9->next(); // Stays the same, but set it anyway
+    h9->twin() = h4;
+    h9->vertex() = v1; 
+    h9->edge() = e4; 
+    h9->face() = h9->face(); // Stays the same, but set it anyway
+
+    v0->halfedge() = h2;
+    v1->halfedge() = h5;
+    v2->halfedge() = h3;
+    v3->halfedge() = h0; //Maybe if we hava many choice, we can randomly change one of them.
+
+    e0->halfedge() = h0;
+    e1->halfedge() = h5; 
+    e2->halfedge() = h1;
+    e3->halfedge() = h2;
+    e4->halfedge() = h4;
+
+    f0->halfedge() = h0;
+    f1->halfedge() = h3;
+
+    // Return the flipped edge
+    return e0;
+
+
   }
 
   VertexIter HalfedgeMesh::splitEdge( EdgeIter e0 )
@@ -80,7 +215,9 @@ namespace CGL
     // TODO Part 5.
     // This method should split the given edge and return an iterator to the newly inserted vertex.
     // The halfedge of this vertex should point along the edge that was split, rather than the new edges.
-    return VertexIter();
+    
+     return VertexIter();
+
   }
 
 

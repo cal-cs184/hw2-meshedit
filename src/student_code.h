@@ -5,7 +5,9 @@
 #include "bezierPatch.h"
 #include "bezierCurve.h"
 
-using namespace std;
+using namespace std; 
+// 这意味着代码中的所有 std 命名空间下的符号都可以直接使用，
+// 而不需要在使用它们时加上 std:: 前缀
 
 namespace CGL {
 

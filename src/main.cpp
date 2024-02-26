@@ -97,7 +97,7 @@ int main( int argc, char** argv ) {
 
     int numControlPoints;
     fscanf(file_handle.file, "%d", &numControlPoints);
-
+    
     BezierCurve curve(numControlPoints);
     curve.loadControlPoints(file_handle.file);
 
