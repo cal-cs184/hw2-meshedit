@@ -519,7 +519,6 @@ namespace CGL
      do {
   
          // create inital values
-         VertexIter v_a, v_b, v_c, v_d;
          EdgeIter curr_edge = all_he_iter2->edge();
 
          // find surrounding vertices of rhombus (2 triangles)
