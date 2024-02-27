@@ -362,16 +362,29 @@ namespace CGL
       // 1. Compute new positions for all the vertices in the input mesh, using the Loop subdivision rule,
       // and store them in Vertex::newPosition. At this point, we also want to mark each vertex as being
       // a vertex of the original mesh.
-
-      //mesh.verticesBegin();
-      /*for (int i = 0; i < verticies; i++) {
-      *     vertice_a = 
-          * vertice_b = 
-          * vertice_c = 
-          * vertice_d = 
-            vertice_new_position = ((3 / 8) * (A + B)) + ((1 / 8) * (C + D))
-        }*/
+      // mesh.verticesBegin();
+      Size v_size = mesh.nVertices();
+      VertexIter v_iter = mesh.verticesBegin();
+      HalfedgeIter h_v = v_iter->halfedge();
+      
+      for (int i = 0; i < v_size; i++) {
+          v_iter->isNew = false;
+      }
+      for (int i = 0; i < v_size; i++) {
+          v_iter->isNew = false;
+          //n = vertex degree
+          // u = 3/16 if n = 3 else 3/(8n)
+          //old_vertex upgrade(1 - n * u) * original_position + u * original_neighbor_position_sum
+         // h_v->vertex()->newPosition = ((3 / 8) * (A + B)) + ((1 / 8) * (C + D));
+          
+          // vertice_a = 
+          // vertice_b = 
+          // vertice_c = 
+          // vertice_d = 
+          //  vertice_new_position = ((3 / 8) * (A + B)) + ((1 / 8) * (C + D))
+        }
     
+
       //new_vertex upgrade 3 / 8 * (A + B) + 1 / 8 * (C + D)
        /*for (int i = 0; i < edges; i++) {
       *    edge.split()
@@ -388,7 +401,8 @@ namespace CGL
     // the original mesh---otherwise, we'll end up splitting edges that we just split (and the loop will never end!)
     
     // 4. Flip any new edge that connects an old and new vertex.
-
+    // if edge is boundary don't flip 
+      // if (e0->isBoundary()) { return e0->halfedge()->vertex(); }
     // 5. Copy the new vertex positions into final Vertex::position.
 
   }
