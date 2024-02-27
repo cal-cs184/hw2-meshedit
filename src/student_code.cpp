@@ -447,13 +447,23 @@ namespace CGL
       // and store them in Vertex::newPosition. At this point, we also want to mark each vertex as being
       // a vertex of the original mesh.
 
+
+      /*
+      HalfedgeIter all_he_iter = h;
+      do {
+            all_he_iter->next();
+       } while (all_he_iter != h);
+      
+      */
+
       // set up mesh
       Size v_size = mesh.nVertices();
       VertexIter v_iter = mesh.verticesBegin();
       HalfedgeIter h = v_iter->halfedge();
+      HalfedgeIter f_h = v_iter->halfedge()->face()->halfedge();
 
       // set initial half_edge, and half_edge count, initial vertex_const
-      HalfedgeIter all_he_iter = v_iter->halfedge();
+      HalfedgeIter all_he_iter = f_h;
       int half_edge_counter = 0;
       float vertex_const;
 
@@ -468,7 +478,8 @@ namespace CGL
           Vector3D neighbors_pos = Vector3D(0, 0, 0);
           HalfedgeIter neighbor_iter = all_he_iter;
           VertexIter curr_vertex = all_he_iter->vertex();
-          int vertexDegree = 0;
+          //int vertexDegree = 0;
+          int vertexDegree = curr_vertex->degree();
 
           // set all old verticies = not new
           curr_vertex->isNew = false;
@@ -478,7 +489,7 @@ namespace CGL
           do {
               // Sum neighbors position, add 1 vertex degree
               neighbors_pos += neighbor_iter->vertex()->position;
-              vertexDegree += 1;
+              //vertexDegree += 1;
 
               // move to next halfedge of vertex
               neighbor_iter = neighbor_iter->twin()->next();
@@ -508,12 +519,12 @@ namespace CGL
               all_he_iter->next();
               half_edge_counter += 1;
           }
-      } while (all_he_iter != h);
+      } while (all_he_iter != f_h);
  
     // 2. Compute the updated vertex positions associated with edges, and store it in Edge::newPosition.
     
       // initilize curr half_edge and half_edge counter
-      HalfedgeIter all_he_iter2 = h;
+      HalfedgeIter all_he_iter2 = f_h;
       int half_edge_counter2 = 0;
 
     //  loop through each edge
@@ -549,7 +560,7 @@ namespace CGL
              all_he_iter2->next();
              half_edge_counter2 += 1;
          }
-     } while (all_he_iter2 != h);
+     } while (all_he_iter2 != f_h);
       
 
     // 3. Split every edge in the mesh, in any order. For future reference, we're also going to store some
@@ -558,7 +569,7 @@ namespace CGL
     // the original mesh---otherwise, we'll end up splitting edges that we just split (and the loop will never end!)
       
     // initilize curr half_edge and half_edge counter
-     HalfedgeIter all_he_iter3 = h;
+     HalfedgeIter all_he_iter3 = f_h;
      int half_edge_counter3 = 0;
      
      // loop through each edge for this specific vertex
@@ -587,7 +598,7 @@ namespace CGL
              half_edge_counter3 += 1;
          }
 
-     } while (all_he_iter3 != h);
+     } while (all_he_iter3 != f_h);
      // && !all_he_iter->edge()->isNew
 
 
@@ -595,7 +606,7 @@ namespace CGL
     // 5. Copy the new vertex positions into final Vertex::position.
     
     // initilize curr half_edge and half_edge counter
-     HalfedgeIter all_he_iter4 = h;
+     HalfedgeIter all_he_iter4 = f_h;
      int half_edge_counter4 = 0;
          
      do {
@@ -630,7 +641,7 @@ namespace CGL
              half_edge_counter4 += 1;
          }
 
-     } while (all_he_iter4 != h);
+     } while (all_he_iter4 != f_h);
 
   }
 
