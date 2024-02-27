@@ -453,7 +453,7 @@ namespace CGL
       HalfedgeIter h = v_iter->halfedge();
 
       // set initial half_edge, and half_edge count, initial vertex_const
-      HalfedgeIter all_he_iter = h;
+      HalfedgeIter all_he_iter = v_iter->halfedge();
       int half_edge_counter = 0;
       float vertex_const;
 
@@ -493,6 +493,7 @@ namespace CGL
               vertex_const = 3 / (8 * vertexDegree);
           }
 
+          // vertex->degree??
           // set new position for curr vertex
           curr_vertex->newPosition = ((1 - vertexDegree * vertex_const) * curr_vertex->position) + (vertex_const * neighbors_pos);
           
@@ -563,17 +564,23 @@ namespace CGL
      // loop through each edge for this specific vertex
      // while the curr half_edge != intial half_edge of this group of vertices
      do {
-          //
+          //initialize current edge
+
          EdgeIter curr_edge = all_he_iter3->edge();
-         // move to next halfedge of vertex
+
+         // if curr edge is old split the edge, set new edge to new = true
          if (!curr_edge->isNew) {
-             mesh.splitEdge(curr_edge);
-             curr_edge->isNew = true;
+             VertexIter new_vertex = mesh.splitEdge(curr_edge);
+             new_vertex->halfedge()->edge()->isNew = true;
          }
 
+         // move to next_halfedge/vertex of mesh
+        // if half edge count == 3 means looped through whole face
+        // so move onto next face 
          if (half_edge_counter3 == 3) {
              all_he_iter3->twin()->next();
              half_edge_counter3 = 0;
+             //printf("help");
          }
          else {
              all_he_iter3->next();
@@ -586,22 +593,21 @@ namespace CGL
 
     // 4. Flip any new edge that connects an old and new vertex.
     // 5. Copy the new vertex positions into final Vertex::position.
-    // 
+    
     // initilize curr half_edge and half_edge counter
      HalfedgeIter all_he_iter4 = h;
      int half_edge_counter4 = 0;
          
      do {
-         //
+         // Initialize current edge, current vertex, and connecting vertex
          EdgeIter curr_edge = all_he_iter4->edge();
          VertexIter curr_vertex = curr_edge->halfedge()->vertex();
          VertexIter connected_vertex = curr_edge->halfedge()->next()->vertex();
 
          // if edge is boundary don't flip 
          if (!curr_edge->isBoundary()) {
-            // VertexIter curr_vertex = curr_edge->halfedge()->vertex();
-            // VertexIter connected_vertex = curr_edge->halfedge()->next()->vertex();
-             // move to next halfedge of vertex
+            
+             // if curr vertex is old and connecting vertex new then flip curr_edge
              if (!curr_vertex->isNew && connected_vertex->isNew) {
                  mesh.flipEdge(curr_edge);
              }
@@ -612,6 +618,9 @@ namespace CGL
          // set position final for boundary edges
          curr_vertex->position = curr_vertex->newPosition;
 
+        // move to next_halfedge/vertex of mesh
+        // if half edge count == 3 means looped through whole face
+        // so move onto next face 
          if (half_edge_counter4 == 3) {
              all_he_iter4->twin()->next();
              half_edge_counter4 = 0;
