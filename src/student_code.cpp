@@ -280,8 +280,15 @@ namespace CGL
             VertexIter v1 = h4->vertex();
             VertexIter v2 = h5->vertex();
 
+            /*v0->isNew = false;
+            v1->isNew = false; 
+            v2->isNew = false;*/
+
             EdgeIter e1 = h1->edge();
             EdgeIter e2 = h2->edge();
+
+            /*e1->isNew = false;
+            e2->isNew = false;*/
 
             FaceIter f0 = h0->face();
 
@@ -295,8 +302,13 @@ namespace CGL
             VertexIter v3 = newVertex();
             v3->position = (v0->position + v1->position) / 2;
 
+            v3->isNew = true;
+
             EdgeIter e3 = newEdge();
             EdgeIter e4 = newEdge();
+
+            e3->isNew = true;
+            e4->isNew = true;
 
             FaceIter f1 = newFace();
 
@@ -364,6 +376,11 @@ namespace CGL
             EdgeIter e3 = h4->edge();
             EdgeIter e4 = h5->edge();
 
+            /*e1->isNew = false;
+            e2->isNew = false;
+            e3->isNew = false;
+            e4->isNew = false;*/
+
             FaceIter f0 = h0->face();
             FaceIter f1 = h3->face();
 
@@ -385,6 +402,10 @@ namespace CGL
 
             FaceIter f2 = newFace();
             FaceIter f3 = newFace();
+
+            e5->isNew = true;
+            e6->isNew = true;
+            e7->isNew = true;
 
             // Step3: Reassign elements
             /*
@@ -549,19 +570,20 @@ namespace CGL
             VertexIter connected_vertex = curr_vertex->halfedge()->next()->vertex();
 
             // if edge is boundary don't flip 
-            if (!e->isBoundary()) {
+            if (!e->isBoundary() && e->isNew == true) {
 
                 // if curr vertex is old and connecting vertex new then flip curr_edge
-                if (!curr_vertex->isNew && connected_vertex->isNew) {
+                // && connected_vertex->isNew
+                if (!curr_vertex->isNew) {
                     mesh.flipEdge(e);
                 }
                 // set position final for inner edges (non-boundary)
-                curr_vertex->position = e->newPosition;
+               // curr_vertex->position = e->newPosition;
 
             }
-            else {
+           // else {
                 curr_vertex->position = curr_vertex->newPosition;
-            }
+            //}
             // set position final for boundary edges
             
         }
