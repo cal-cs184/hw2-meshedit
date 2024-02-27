@@ -446,48 +446,184 @@ namespace CGL
       // 1. Compute new positions for all the vertices in the input mesh, using the Loop subdivision rule,
       // and store them in Vertex::newPosition. At this point, we also want to mark each vertex as being
       // a vertex of the original mesh.
-      // mesh.verticesBegin();
+
+      // set up mesh
       Size v_size = mesh.nVertices();
       VertexIter v_iter = mesh.verticesBegin();
-      HalfedgeIter h_v = v_iter->halfedge();
-      
-      for (int i = 0; i < v_size; i++) {
-          v_iter->isNew = false;
-      }
-      for (int i = 0; i < v_size; i++) {
-          v_iter->isNew = false;
-          //n = vertex degree
-          // u = 3/16 if n = 3 else 3/(8n)
-          //old_vertex upgrade(1 - n * u) * original_position + u * original_neighbor_position_sum
-         // h_v->vertex()->newPosition = ((3 / 8) * (A + B)) + ((1 / 8) * (C + D));
+      HalfedgeIter h = v_iter->halfedge();
+
+      // set initial half_edge, and half_edge count, initial vertex_const
+      HalfedgeIter all_he_iter = h;
+      int half_edge_counter = 0;
+      float vertex_const;
+
+      // loop through each vertex in mesh
+      // while the curr half_edge != intial half_edge of whole mesh
+      do {
+          // Define:
+          // - sum of neighbors' positions
+          // - curr half_edge for looping through neighbor
+          // - vertex of current half_edge
+          // - counter for degree of current vertex
+          Vector3D neighbors_pos = Vector3D(0, 0, 0);
+          HalfedgeIter neighbor_iter = all_he_iter;
+          VertexIter curr_vertex = all_he_iter->vertex();
+          int vertexDegree = 0;
+
+          // set all old verticies = not new
+          curr_vertex->isNew = false;
+         
+          // loop through each edge for this specific vertex
+          // while the curr half_edge != intial half_edge of this group of vertices
+          do {
+              // Sum neighbors position, add 1 vertex degree
+              neighbors_pos += neighbor_iter->vertex()->position;
+              vertexDegree += 1;
+
+              // move to next halfedge of vertex
+              neighbor_iter = neighbor_iter->twin()->next();
+
+          } while (neighbor_iter != all_he_iter);
+
+          // set vertexDegree
+          if (vertexDegree == 3) {
+              vertex_const = 3 / 16;
+          }
+          else {
+              vertex_const = 3 / (8 * vertexDegree);
+          }
+
+          // set new position for curr vertex
+          curr_vertex->newPosition = ((1 - vertexDegree * vertex_const) * curr_vertex->position) + (vertex_const * neighbors_pos);
           
-          // vertice_a = 
-          // vertice_b = 
-          // vertice_c = 
-          // vertice_d = 
-          //  vertice_new_position = ((3 / 8) * (A + B)) + ((1 / 8) * (C + D))
-        }
-    
-
-      //new_vertex upgrade 3 / 8 * (A + B) + 1 / 8 * (C + D)
-       /*for (int i = 0; i < edges; i++) {
-      *    edge.split()
-      * 
-        }*/
-      
-      //old_vertex upgrade (1 - n * u) * original_position + u * original_neighbor_position_sum
-
+          // move to next_halfedge/vertex of mesh
+          // if half edge count == 3 means looped through whole face
+          // so move onto next face 
+          if (half_edge_counter == 3) {
+              all_he_iter->twin()->next();
+              half_edge_counter = 0;
+          }
+          else {
+              all_he_iter->next();
+              half_edge_counter += 1;
+          }
+      } while (all_he_iter != h);
+ 
     // 2. Compute the updated vertex positions associated with edges, and store it in Edge::newPosition.
     
+      // initilize curr half_edge and half_edge counter
+      HalfedgeIter all_he_iter2 = h;
+      int half_edge_counter2 = 0;
+
+    //  loop through each edge
+     do {
+  
+         // create inital values
+         VertexIter v_a, v_b, v_c, v_d;
+         EdgeIter curr_edge = all_he_iter2->edge();
+
+         // find surrounding vertices of rhombus (2 triangles)
+         VertexIter v_a = curr_edge->halfedge()->vertex();
+         VertexIter v_b = v_a->halfedge()->next()->vertex();
+         VertexIter v_c = v_b->halfedge()->next()->vertex();
+         // this is for the vertex not in the triangle
+         VertexIter v_d = v_c->halfedge()->twin()->next()->vertex();
+
+         // figure out position for surrounding vertices
+         Vector3D v_a_pos = v_a->position;
+         Vector3D v_b_pos = v_b->position;
+         Vector3D v_c_pos = v_c->position;
+         Vector3D v_d_pos = v_d->position;
+
+         //calculate newedge position
+         curr_edge->newPosition = ((3 / 8) * (v_a_pos + v_b_pos)) + ((1 / 8) * (v_c_pos + v_d_pos));
+
+         // move to next_halfedge/vertex of mesh
+         // if half edge count == 3 means looped through whole face
+         // so move onto next face 
+         if (half_edge_counter2 == 3) {
+             all_he_iter2->twin()->next();
+             half_edge_counter2 = 0;
+         }
+         else {
+             all_he_iter2->next();
+             half_edge_counter2 += 1;
+         }
+     } while (all_he_iter2 != h);
+      
+
     // 3. Split every edge in the mesh, in any order. For future reference, we're also going to store some
     // information about which subdivide edges come from splitting an edge in the original mesh, and which edges
     // are new, by setting the flat Edge::isNew. Note that in this loop, we only want to iterate over edges of
     // the original mesh---otherwise, we'll end up splitting edges that we just split (and the loop will never end!)
-    
+      
+    // initilize curr half_edge and half_edge counter
+     HalfedgeIter all_he_iter3 = h;
+     int half_edge_counter3 = 0;
+     
+     // loop through each edge for this specific vertex
+     // while the curr half_edge != intial half_edge of this group of vertices
+     do {
+          //
+         EdgeIter curr_edge = all_he_iter3->edge();
+         // move to next halfedge of vertex
+         if (!curr_edge->isNew) {
+             mesh.splitEdge(curr_edge);
+             curr_edge->isNew = true;
+         }
+
+         if (half_edge_counter3 == 3) {
+             all_he_iter3->twin()->next();
+             half_edge_counter3 = 0;
+         }
+         else {
+             all_he_iter3->next();
+             half_edge_counter3 += 1;
+         }
+
+     } while (all_he_iter3 != h);
+     // && !all_he_iter->edge()->isNew
+
+
     // 4. Flip any new edge that connects an old and new vertex.
-    // if edge is boundary don't flip 
-      // if (e0->isBoundary()) { return e0->halfedge()->vertex(); }
     // 5. Copy the new vertex positions into final Vertex::position.
+    // 
+    // initilize curr half_edge and half_edge counter
+     HalfedgeIter all_he_iter4 = h;
+     int half_edge_counter4 = 0;
+         
+     do {
+         //
+         EdgeIter curr_edge = all_he_iter4->edge();
+         VertexIter curr_vertex = curr_edge->halfedge()->vertex();
+         VertexIter connected_vertex = curr_edge->halfedge()->next()->vertex();
+
+         // if edge is boundary don't flip 
+         if (!curr_edge->isBoundary()) {
+            // VertexIter curr_vertex = curr_edge->halfedge()->vertex();
+            // VertexIter connected_vertex = curr_edge->halfedge()->next()->vertex();
+             // move to next halfedge of vertex
+             if (!curr_vertex->isNew && connected_vertex->isNew) {
+                 mesh.flipEdge(curr_edge);
+             }
+             // set position final for inner edges (non-boundary)
+             curr_vertex->position = curr_edge->newPosition;
+
+         }
+         // set position final for boundary edges
+         curr_vertex->position = curr_vertex->newPosition;
+
+         if (half_edge_counter4 == 3) {
+             all_he_iter4->twin()->next();
+             half_edge_counter4 = 0;
+         }
+         else {
+             all_he_iter4->next();
+             half_edge_counter4 += 1;
+         }
+
+     } while (all_he_iter4 != h);
 
   }
+
 }
