@@ -622,12 +622,13 @@ namespace CGL
         for (auto v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
         {
             
-            if (v->isNew) {
+            if (v->isNew && !v->halfedge()->edge()->isNew) {
                 v->position = v->halfedge()->next()->edge()->newPosition;
-                cout << v->halfedge()->next()->edge()->newPosition;
+                //cout << v->halfedge()->edge()->newPosition;
             }
             else{
                 v->position = v->newPosition;
+                //cout << v->newPosition;
             }
             //cout << v->position;
         }
