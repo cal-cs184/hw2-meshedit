@@ -452,9 +452,9 @@ namespace CGL
             e7->halfedge() = h10;
 
             //set some e to false???
-            /*e5->isNew = true;
+            e5->isNew = true;
             e6->isNew = true;
-            e7->isNew = true;*/
+            e7->isNew = true;
 
             f0->halfedge() = h0;
             f1->halfedge() = h3;
@@ -568,12 +568,12 @@ namespace CGL
             // if curr edge is old split the edge, set new edge to new = true
             // && backwards??
             //&& (curr_vertex->isNew == false && connected_vertex->isNew == false)
-            if ((!e->isNew) && (curr_vertex->isNew == false && connected_vertex->isNew == false)) {
+            if ((!e->isNew)) {
                 //cout << "working";
                 VertexIter new_vertex = mesh.splitEdge(e);
                 //new_vertex->halfedge()->edge()->isNew = true;
-                new_vertex->halfedge()->twin()->next()->edge()->isNew = false;
-                new_vertex->halfedge()->next()->next()->edge()->isNew = false;
+                //new_vertex->halfedge()->twin()->next()->edge()->isNew = false;
+                //new_vertex->halfedge()->next()->next()->edge()->isNew = false;
 
             }
        }
@@ -585,7 +585,9 @@ namespace CGL
         //mesh.flipEdge(mesh.edgesBegin());
         for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
             VertexIter curr_vertex = e->halfedge()->vertex();
-            VertexIter connected_vertex = curr_vertex->halfedge()->next()->vertex();
+            VertexIter connected_vertex = e->halfedge()->twin()->vertex();
+
+           // VertexIter connected_vertex = curr_vertex->halfedge()->next()->vertex();
 
             // if edge is boundary don't flip 
             // && e->isNew == true
@@ -598,7 +600,7 @@ namespace CGL
                 // || curr_vertex->isNew && !connected_vertex->isNew
                 // check one new! isEqual to other new
                 if (curr_vertex->isNew != connected_vertex->isNew) {
-                    mesh.flipEdge(e);
+                    //mesh.flipEdge(e);
                     // is this redundant??
                     //e->halfedge()->vertex()->isNew = true;
                     
