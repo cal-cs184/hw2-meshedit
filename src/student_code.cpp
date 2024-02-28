@@ -307,8 +307,8 @@ namespace CGL
             EdgeIter e3 = newEdge();
             EdgeIter e4 = newEdge();
 
-            e3->isNew = true;
-            e4->isNew = true;
+            //e3->isNew = true;
+            //e4->isNew = true;
 
             FaceIter f1 = newFace();
 
@@ -396,6 +396,8 @@ namespace CGL
             VertexIter v4 = newVertex();
             v4->position = (v0->position + v1->position) / 2;
 
+            v4->isNew = true;
+
             EdgeIter e5 = newEdge();
             EdgeIter e6 = newEdge();
             EdgeIter e7 = newEdge();
@@ -405,6 +407,8 @@ namespace CGL
 
             e5->isNew = true;
             e6->isNew = true;
+            //e5->isNew = false;
+            //e6->isNew = false;
             e7->isNew = true;
 
             // Step3: Reassign elements
@@ -447,6 +451,11 @@ namespace CGL
             e6->halfedge() = h15;
             e7->halfedge() = h10;
 
+            //set some e to false???
+            /*e5->isNew = true;
+            e6->isNew = true;
+            e7->isNew = true;*/
+
             f0->halfedge() = h0;
             f1->halfedge() = h3;
             f2->halfedge() = h11;
@@ -470,7 +479,6 @@ namespace CGL
         
         // set up mesh
        // int half_edge_counter = 0;
-        
 
          // loop through each vertex in mesh
          // while the curr half_edge != intial half_edge of whole mesh
@@ -521,7 +529,8 @@ namespace CGL
 
         for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
             // create inital values
-            //EdgeIter curr_edge = e;
+            // EdgeIter curr_edge = e;
+            //e->isNew = false
 
             //might be off AHHHHHHHHHHHHHH
             // find surrounding vertices of rhombus (2 triangles)
@@ -549,14 +558,23 @@ namespace CGL
 
       // loop through each edge for this specific vertex
       // while the curr half_edge != intial half_edge of this group of vertices
+    
         for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
             //EdgeIter curr_edge = all_edges3->edge();
+            VertexIter curr_vertex = e->halfedge()->vertex();
+            // rethink connected vertex
+            VertexIter connected_vertex = curr_vertex->halfedge()->next()->vertex();
 
             // if curr edge is old split the edge, set new edge to new = true
-            if (!e->isNew) {
+            // && backwards??
+            //&& (curr_vertex->isNew == false && connected_vertex->isNew == false)
+            if ((!e->isNew) && (curr_vertex->isNew == false && connected_vertex->isNew == false)) {
+                //cout << "working";
                 VertexIter new_vertex = mesh.splitEdge(e);
-                // ask AHHHHHHHHHHHHHHHHHHHHHH
-                new_vertex->halfedge()->edge()->isNew = true;
+                //new_vertex->halfedge()->edge()->isNew = true;
+                new_vertex->halfedge()->twin()->next()->edge()->isNew = false;
+                new_vertex->halfedge()->next()->next()->edge()->isNew = false;
+
             }
        }
 
@@ -564,26 +582,34 @@ namespace CGL
     // 5. Copy the new vertex positions into final Vertex::position.
     
     // initilize curr half_edge and half_edge counter
-     
+        //mesh.flipEdge(mesh.edgesBegin());
         for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
             VertexIter curr_vertex = e->halfedge()->vertex();
             VertexIter connected_vertex = curr_vertex->halfedge()->next()->vertex();
 
             // if edge is boundary don't flip 
-            if (!e->isBoundary() && e->isNew == true) {
-
+            // && e->isNew == true
+            //cout << "e: " << e->newPosition << " ";
+           // cout << "e->isNew: " << e->isNew << '\n';
+            //cout << "e->boundary: " << e->isBoundary() << '\n';
+            //cout << "curr_vertex: " << curr_vertex->isNew << '\n';
+            if (e->isNew == true) {
                 // if curr vertex is old and connecting vertex new then flip curr_edge
-                // && connected_vertex->isNew
-                if (!curr_vertex->isNew) {
+                // || curr_vertex->isNew && !connected_vertex->isNew
+                // check one new! isEqual to other new
+                if (curr_vertex->isNew != connected_vertex->isNew) {
                     mesh.flipEdge(e);
+                    // is this redundant??
+                    //e->halfedge()->vertex()->isNew = true;
+                    
                 }
                 // set position final for inner edges (non-boundary)
-               // curr_vertex->position = e->newPosition;
+                //curr_vertex->position = e->newPosition;
 
             }
-           // else {
+            /*else {
                 curr_vertex->position = curr_vertex->newPosition;
-            //}
+            }*/
             // set position final for boundary edges
             
         }
