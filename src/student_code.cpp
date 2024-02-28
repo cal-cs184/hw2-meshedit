@@ -494,7 +494,7 @@ namespace CGL
             //changed to half_edge
             HalfedgeIter neighbor_iter = v->halfedge();
             int vertexDegree = v->degree();
-            float vertex_const;
+            float vertex_const= 0.0;
 
             // set all old verticies = not new
             v->isNew = false;
@@ -524,11 +524,12 @@ namespace CGL
             // vertex->degree??
             // set new position for curr vertex
             v->newPosition = ((1 - vertexDegree * vertex_const) * v->position) + (vertex_const * neighbors_pos);
+           // cout << v->newPosition;
         }
         // 2. Compute the updated vertex positions associated with edges, and store it in Edge::newPosition.
 
           //  loop through each edge
-
+       // mesh.flipEdge(mesh.edgesBegin());
         for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
             // create inital values
             // EdgeIter curr_edge = e;
@@ -537,10 +538,10 @@ namespace CGL
             //might be off AHHHHHHHHHHHHHH
             // find surrounding vertices of rhombus (2 triangles)
             VertexIter v_a = e->halfedge()->vertex();
-            VertexIter v_b = v_a->halfedge()->next()->vertex();
-            VertexIter v_c = v_b->halfedge()->next()->vertex();
+            VertexIter v_b = e->halfedge()->next()->vertex();
+            VertexIter v_c = e->halfedge()->next()->next()->vertex();
             // this is for the vertex not in the triangle
-            VertexIter v_d = v_a->halfedge()->twin()->next()->next()->vertex();
+            VertexIter v_d = e->halfedge()->twin()->next()->next()->vertex();
 
             // figure out position for surrounding vertices
             Vector3D v_a_pos = v_a->position;
@@ -550,7 +551,7 @@ namespace CGL
 
             //calculate newedge position
             e->newPosition = (((float) 3 / 8) * (v_a_pos + v_b_pos)) + (((float) 1 / 8) * (v_c_pos + v_d_pos));
-            //cout << 3 / 8 + "   oos";
+            //cout <<  (((float) 3 / 8) * (v_a_pos + v_b_pos)) + (((float) 1 / 8) * (v_c_pos + v_d_pos));
         }
 
         // 3. Split every edge in the mesh, in any order. For future reference, we're also going to store some
@@ -620,12 +621,15 @@ namespace CGL
         
         for (auto v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
         {
+            
             if (v->isNew) {
-                v->position = v->halfedge()->edge()->newPosition;
+                v->position = v->halfedge()->next()->edge()->newPosition;
+                cout << v->halfedge()->next()->edge()->newPosition;
             }
-            else {
+            else{
                 v->position = v->newPosition;
             }
+            //cout << v->position;
         }
         
                 // set position final for inner edges (non-boundary)
