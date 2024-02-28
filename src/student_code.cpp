@@ -562,8 +562,7 @@ namespace CGL
         for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
             //EdgeIter curr_edge = all_edges3->edge();
             VertexIter curr_vertex = e->halfedge()->vertex();
-            // rethink connected vertex
-            VertexIter connected_vertex = curr_vertex->halfedge()->next()->vertex();
+            VertexIter connected_vertex = e->halfedge()->twin()->vertex();
 
             // if curr edge is old split the edge, set new edge to new = true
             // && backwards??
@@ -600,7 +599,7 @@ namespace CGL
                 // || curr_vertex->isNew && !connected_vertex->isNew
                 // check one new! isEqual to other new
                 if (curr_vertex->isNew != connected_vertex->isNew) {
-                    //mesh.flipEdge(e);
+                   mesh.flipEdge(e);
                     // is this redundant??
                     //e->halfedge()->vertex()->isNew = true;
                     
@@ -609,9 +608,9 @@ namespace CGL
                 //curr_vertex->position = e->newPosition;
 
             }
-            /*else {
+            else {
                 curr_vertex->position = curr_vertex->newPosition;
-            }*/
+            }
             // set position final for boundary edges
             
         }
