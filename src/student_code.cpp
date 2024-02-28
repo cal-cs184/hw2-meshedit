@@ -512,12 +512,14 @@ namespace CGL
             } while (neighbor_iter != v->halfedge());
 
             // check vertexDegree
+            //cout << vertexDegree;
             if (vertexDegree == 3) {
-                vertex_const = 3 / 16;
+                vertex_const = (float) 3 / 16;
             }
             else {
-                vertex_const = 3 / (8 * vertexDegree);
+                vertex_const = (float) 3 / (8 * vertexDegree);
             }
+            //cout << vertex_const;
 
             // vertex->degree??
             // set new position for curr vertex
@@ -547,73 +549,93 @@ namespace CGL
             Vector3D v_d_pos = v_d->position;
 
             //calculate newedge position
-            e->newPosition = ((3 / 8) * (v_a_pos + v_b_pos)) + ((1 / 8) * (v_c_pos + v_d_pos));
+            e->newPosition = (((float) 3 / 8) * (v_a_pos + v_b_pos)) + (((float) 1 / 8) * (v_c_pos + v_d_pos));
+            //cout << 3 / 8 + "   oos";
         }
 
         // 3. Split every edge in the mesh, in any order. For future reference, we're also going to store some
-        // information about which subdivide edges come from splitting an edge in the original mesh, and which edges
-        // are new, by setting the flat Edge::isNew. Note that in this loop, we only want to iterate over edges of
-        // the original mesh---otherwise, we'll end up splitting edges that we just split (and the loop will never end!)
+// information about which subdivide edges come from splitting an edge in the original mesh, and which edges
+// are new, by setting the flat Edge::isNew. Note that in this loop, we only want to iterate over edges of
+// the original mesh---otherwise, we'll end up splitting edges that we just split (and the loop will never end!)
 
 
-      // loop through each edge for this specific vertex
-      // while the curr half_edge != intial half_edge of this group of vertices
-    
+  // loop through each edge for this specific vertex
+  // while the curr half_edge != intial half_edge of this group of vertices
+
+        vector<EdgeIter> originalEdges;
         for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
-            //EdgeIter curr_edge = all_edges3->edge();
+            originalEdges.push_back(e);
+        }
+
+        //cout << mesh.nHalfedges();
+        for (auto e = originalEdges.begin(); e != originalEdges.end(); e++) {
+
+            // VertexIter curr_vertex = (*e)->halfedge()->vertex();
+            // VertexIter connected_vertex = e->halfedge()->twin()->vertex();
+
+            // Start time
+            auto start = std::chrono::high_resolution_clock::now();
+
+            VertexIter new_vertex = mesh.splitEdge(*e);
+            new_vertex->isNew = true;
+            new_vertex->newPosition = (*e)->newPosition;
+            new_vertex->halfedge()->edge()->isNew = false;
+            new_vertex->halfedge()->twin()->next()->edge()->isNew = true;
+            new_vertex->halfedge()->next()->next()->edge()->isNew = true;
+            new_vertex->halfedge()->twin()->next()->twin()->next()->edge()->isNew = false;
+
+
+            auto stop = std::chrono::high_resolution_clock::now();
+
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+
+
+            // std::cout << "Time taken by iteration: " << duration.count() << " microseconds" << std::endl;
+
+
+        }
+
+        // 4. Flip any new edge that connects an old and new vertex.
+        // 5. Copy the new vertex positions into final Vertex::position.
+
+        // initilize curr half_edge and half_edge counter
+            //mesh.flipEdge(mesh.edgesBegin());
+        for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
             VertexIter curr_vertex = e->halfedge()->vertex();
             VertexIter connected_vertex = e->halfedge()->twin()->vertex();
 
-            // if curr edge is old split the edge, set new edge to new = true
-            // && backwards??
-            //&& (curr_vertex->isNew == false && connected_vertex->isNew == false)
-            if ((!e->isNew)) {
-                //cout << "working";
-                VertexIter new_vertex = mesh.splitEdge(e);
-                //new_vertex->halfedge()->edge()->isNew = true;
-                //new_vertex->halfedge()->twin()->next()->edge()->isNew = false;
-                //new_vertex->halfedge()->next()->next()->edge()->isNew = false;
-
-            }
-       }
-
-    // 4. Flip any new edge that connects an old and new vertex.
-    // 5. Copy the new vertex positions into final Vertex::position.
-    
-    // initilize curr half_edge and half_edge counter
-        //mesh.flipEdge(mesh.edgesBegin());
-        for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
-            VertexIter curr_vertex = e->halfedge()->vertex();
-            VertexIter connected_vertex = e->halfedge()->twin()->vertex();
-
-           // VertexIter connected_vertex = curr_vertex->halfedge()->next()->vertex();
-
-            // if edge is boundary don't flip 
-            // && e->isNew == true
-            //cout << "e: " << e->newPosition << " ";
-           // cout << "e->isNew: " << e->isNew << '\n';
-            //cout << "e->boundary: " << e->isBoundary() << '\n';
-            //cout << "curr_vertex: " << curr_vertex->isNew << '\n';
             if (e->isNew == true) {
                 // if curr vertex is old and connecting vertex new then flip curr_edge
                 // || curr_vertex->isNew && !connected_vertex->isNew
                 // check one new! isEqual to other new
                 if (curr_vertex->isNew != connected_vertex->isNew) {
-                   mesh.flipEdge(e);
-                    // is this redundant??
-                    //e->halfedge()->vertex()->isNew = true;
-                    
+                    mesh.flipEdge(e);
                 }
+               // curr_vertex->position = e->newPosition;
+            }
+           /* else {
+                curr_vertex->position = curr_vertex->newPosition;
+            }*/
+        }
+        
+        for (auto v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
+        {
+            if (v->isNew) {
+                v->position = v->halfedge()->edge()->newPosition;
+            }
+            else {
+                v->position = v->newPosition;
+            }
+        }
+        
                 // set position final for inner edges (non-boundary)
                 //curr_vertex->position = e->newPosition;
 
-            }
-            else {
-                curr_vertex->position = curr_vertex->newPosition;
-            }
+            //}
+          
             // set position final for boundary edges
             
-        }
+       // }
   }
 
 }
