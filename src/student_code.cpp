@@ -503,7 +503,8 @@ namespace CGL
             // while the curr half_edge != intial half_edge of this group of vertices
             do {
                 // Sum neighbors position, add 1 vertex degree
-                neighbors_pos += neighbor_iter->vertex()->position;
+                neighbors_pos += neighbor_iter->next()->vertex()->position;
+                //neighbors_pos += neighbor_iter->vertex()->position;
                 //vertexDegree += 1;
 
                 // move to next halfedge of vertex
@@ -623,7 +624,7 @@ namespace CGL
         {
             
             if (v->isNew && !v->halfedge()->edge()->isNew) {
-                v->position = v->halfedge()->next()->edge()->newPosition;
+                v->position = v->halfedge()->edge()->newPosition;
                 //cout << v->halfedge()->edge()->newPosition;
             }
             else{
