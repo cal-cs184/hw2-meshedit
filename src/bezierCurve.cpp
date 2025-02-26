@@ -171,6 +171,18 @@ namespace CGL {
     }
   }
 
+  
+  void BezierCurve::mouse_button_event(int button, int action) {
+      if (button == GLFW_MOUSE_BUTTON_LEFT) { // Detect left click
+          if (action == GLFW_PRESS) {
+              mouse_pressed = true;
+          }
+          else if (action == GLFW_RELEASE) {
+              mouse_pressed = false;
+          }
+      }
+  }
+
   void BezierCurve::cursor_event(float x, float y, unsigned char keys)
   {
     static float xp, yp;
@@ -185,7 +197,7 @@ namespace CGL {
       y *= height / (float)width;
     }
 
-    if (keys == 4 || keys == 212)
+    if (mouse_pressed)
     {
       if (selected >= 0)
       {
