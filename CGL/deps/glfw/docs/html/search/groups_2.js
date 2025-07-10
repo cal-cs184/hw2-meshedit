@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['initialization_2c_20version_20and_20errors',['Initialization, version and errors',['../group__init.html',1,'']]],
-  ['input_20handling',['Input handling',['../group__input.html',1,'']]]
+  ['codes_0',['Error codes',['../group__errors.html',1,'']]],
+  ['context_20reference_1',['Context reference',['../group__context.html',1,'']]],
+  ['cursor_20shapes_2',['Standard cursor shapes',['../group__shapes.html',1,'']]]
 ];

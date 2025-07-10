@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['oculus_20rift_20guide',['Oculus Rift guide',['../rift.html',1,'']]]
+  ['deprecated_20list_0',['Deprecated List',['../deprecated.html',1,'']]]
 ];
