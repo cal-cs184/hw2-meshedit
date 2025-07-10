@@ -1,7 +1,7 @@
 # Original file Copyright CMU462 Fall 2015:
 # Kayvon Fatahalian, Keenan Crane,
 # Sky Gao, Bryce Summers, Michael Choquette.
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.11)
 project(CGL)
 
 #-------------------------------------------------------------------------------
@@ -106,6 +106,7 @@ if(LINUX)
       set(GCC_CXX_FLAGS "${GCC_CXX_FLAGS} -lpthread")
       set(GCC_CXX_FLAGS "${GCC_CXX_FLAGS} -lxcb")
       set(GCC_CXX_FLAGS "${GCC_CXX_FLAGS} -lXau")
+      set(GLFW_BUILD_WAYLAND OFF)
     endif()
 
     # Debug configuration
