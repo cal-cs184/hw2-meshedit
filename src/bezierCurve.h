@@ -46,6 +46,10 @@ namespace CGL {
 
     void scroll_event(float offset_x, float offset_y) override;
 
+    void mouse_button_event(int button, int action) override;
+
+    bool mouse_pressed = false;
+
   protected:
 
     /**
